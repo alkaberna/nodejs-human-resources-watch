@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const dboper = require('./operations');
 
 const mongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017/';
@@ -15,27 +16,30 @@ mongoClient.connect(url, (err, client) => {
     console.log("Connected correctly to MongoDB server");
 
     const db = client.db(dbName);
-    const collection = db.collection("employees");
-    collection.insertOne({"name": "Raman", "surname": "Ulezla"},
-        (err, result) => {
-            assert.equal(err, null);
 
-            console.log("After Insert:\n");
-            console.log(result.ops);
+    dboper.insertDocument(db, { name: "Aliaksandr", surname: "Kabrna" },
+        "employees", (result) => {
+            console.log("Insert Document:\n", result.ops);
 
-            collection.find({}).toArray((err, docs) => {
-                assert.equal(err, null);
-            
-                console.log("Found:\n");
-                console.log(docs);
+            dboper.findDocuments(db, "employees", (docs) => {
+                console.log("Found Documents:\n", docs);
 
-                db.dropCollection("employees", (err, result) => {
-                    assert.equal(err, null);
+                dboper.updateDocument(db, { name: "Aliaksandr" },
+                    { surname: "Kaberna" }, "employees", (result) => {
+                        console.log("Updated Document:\n", result.result);
 
-                    client.close();
-                });
+                        dboper.findDocuments(db, "employees", (docs) => {
+                            console.log("Found Updated Documents:\n", docs);
+                            
+                            db.dropCollection("employees", (result) => {
+                                console.log("Dropped Collection: ", result);
+
+                                client.close();
+                            });
+                        });
+                    });
             });
-        });
+    });
 });
 
 const employeeRouter = require('./routes/employeeRouter');
