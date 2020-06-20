@@ -9,38 +9,42 @@ const mongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017/';
 const dbName = 'human-resources-watch';
 
-mongoClient.connect(url, (err, client) => {
+mongoClient.connect(url).then((client) => {
 
-    assert.equal(err, null);
-
-    console.log("Connected correctly to MongoDB server");
-
+    console.log("Connected correctly to server");
     const db = client.db(dbName);
 
     dboper.insertDocument(db, { name: "Aliaksandr", surname: "Kabrna" },
-        "employees", (result) => {
-            console.log("Insert Document:\n", result.ops);
+        "employees")
+    .then((result) => {
+        console.log("Insert Document:\n", result.ops);
 
-            dboper.findDocuments(db, "employees", (docs) => {
-                console.log("Found Documents:\n", docs);
+        return dboper.findDocuments(db, "employees");
+    })
+    .then((docs) => {
+        console.log("Found Documents:\n", docs);
 
-                dboper.updateDocument(db, { name: "Aliaksandr" },
-                    { surname: "Kaberna" }, "employees", (result) => {
-                        console.log("Updated Document:\n", result.result);
+        return dboper.updateDocument(db, { name: "Aliaksandr" },
+            { surname: "Kaberna" }, "employees");
+    })
+    .then((result) => {
+        console.log("Updated Document:\n", result.result);
 
-                        dboper.findDocuments(db, "employees", (docs) => {
-                            console.log("Found Updated Documents:\n", docs);
+        return dboper.findDocuments(db, "employees");
+    })
+    .then((docs) => {
+        console.log("Found Updated Documents:\n", docs);
                             
-                            db.dropCollection("employees", (result) => {
-                                console.log("Dropped Collection: ", result);
+        return db.dropCollection("employees");
+    })
+    .then((result) => {
+        console.log("Dropped Collection: ", result);
 
-                                client.close();
-                            });
-                        });
-                    });
-            });
-    });
-});
+        return client.close();
+    })
+    .catch((err) => console.log(err));
+})
+.catch((err) => console.log(err));
 
 const employeeRouter = require('./routes/employeeRouter');
 
