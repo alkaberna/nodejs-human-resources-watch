@@ -1,92 +1,59 @@
-const assert = require('assert');
-const express = require('express');
-const http = require('http');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const dboper = require('./operations');
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
-const mongoClient = require('mongodb').MongoClient;
-const url = 'mongodb://localhost:27017/';
-const dbName = 'human-resources-watch';
-
-mongoClient.connect(url).then((client) => {
-
-    console.log("Connected correctly to server");
-    const db = client.db(dbName);
-
-    dboper.insertDocument(db, { name: "Aliaksandr", surname: "Kabrna" },
-        "employees")
-    .then((result) => {
-        console.log("Insert Document:\n", result.ops);
-
-        return dboper.findDocuments(db, "employees");
-    })
-    .then((docs) => {
-        console.log("Found Documents:\n", docs);
-
-        return dboper.updateDocument(db, { name: "Aliaksandr" },
-            { surname: "Kaberna" }, "employees");
-    })
-    .then((result) => {
-        console.log("Updated Document:\n", result.result);
-
-        return dboper.findDocuments(db, "employees");
-    })
-    .then((docs) => {
-        console.log("Found Updated Documents:\n", docs);
-                            
-        return db.dropCollection("employees");
-    })
-    .then((result) => {
-        console.log("Dropped Collection: ", result);
-
-        return client.close();
-    })
-    .catch((err) => console.log(err));
-})
-.catch((err) => console.log(err));
-
+// var indexRouter = require('./routes/index');
+// var usersRouter = require('./routes/users');
 const employeeRouter = require('./routes/employeeRouter');
 
-const hostname = 'localhost';
-const port = 3000;
+const mongoose = require('mongoose');
 
-const app = express();
+const Employees = require('./models/employees');
 
-app.use(morgan('dev'));
-app.use(bodyParser.json());
-app.use(express.static(__dirname + '/public'));
-app.use('/employees', employeeRouter);
+const url = 'mongodb://localhost:27017/human-resources-watch';
+const connect = mongoose.connect(url);
 
-app.get('/employees/:employeeId', (req, res, next) => {
-    res.end('Will send details of the employee: ' +
-        req.params.employeeId + ' to you!');
-});
-  
-app.post('/employees/:employeeId', (req, res, next) => {
-    res.statusCode = 403;
-    res.end('POST operation not supported on /employees/' + req.params.employeeId);
-});
-  
-app.put('/employees/:employeeId', (req, res, next) => {
-    res.write('Updating the employee: ' + req.params.employeeId + '\n');
-    res.end('Will update the employee: ' + req.body.name + 
-        ' ' + req.body.surname);
-});
-  
-app.delete('/employees/:employeeId', (req, res, next) => {
-    res.end('Deleting employee: ' + req.params.employeeId);
+connect.then(
+    (db) => {
+        console.log("Connected correctly to MongoDB server");
+    },
+    (err) => {
+        console.log(err);
+    }
+);
+
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// app.use('/', indexRouter);
+// app.use('/users', usersRouter);
+app.use('/employees', employeeRouter)
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
 });
 
-app.use((req, res, next) => {
-    console.log(req.headers);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    res.end('<html><body><h1>This is an Express Server</h1></body></html>');
-  });
-  
-const server = http.createServer(app);
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
+
+module.exports = app;
