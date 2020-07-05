@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const Employees = require('../models/employees');
 
@@ -9,7 +11,8 @@ const employeeRouter = express.Router();
 employeeRouter.use(bodyParser.json());
 
 employeeRouter.route('/')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.find({})
     .then(
         (employees) => {
@@ -21,7 +24,7 @@ employeeRouter.route('/')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.create(req.body)
     .then(
         (employee) => {
@@ -34,11 +37,11 @@ employeeRouter.route('/')
     )
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("PUT operation is not supported here.");
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.remove({})
     .then(
         (resp) => {
@@ -52,7 +55,8 @@ employeeRouter.route('/')
 });
 
 employeeRouter.route('/:employeeId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -64,11 +68,11 @@ employeeRouter.route('/:employeeId')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("POST operation is not supported here.");
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findByIdAndUpdate(req.params.employeeId,
         { $set: req.body }, { new: true })
     .then(
@@ -81,7 +85,7 @@ employeeRouter.route('/:employeeId')
     )
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findByIdAndRemove(req.params.employeeId)
     .then(
         (resp) => {
@@ -96,7 +100,8 @@ employeeRouter.route('/:employeeId')
 
 // CONTRACTS
 employeeRouter.route('/:employeeId/contracts')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -115,7 +120,7 @@ employeeRouter.route('/:employeeId/contracts')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -141,11 +146,11 @@ employeeRouter.route('/:employeeId/contracts')
     )
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("PUT operation is not supported here.");
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -175,7 +180,8 @@ employeeRouter.route('/:employeeId/contracts')
 });
 
 employeeRouter.route('/:employeeId/contracts/:contractId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -199,11 +205,11 @@ employeeRouter.route('/:employeeId/contracts/:contractId')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("POST operation is not supported here.");
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -239,7 +245,7 @@ employeeRouter.route('/:employeeId/contracts/:contractId')
     )
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -273,7 +279,8 @@ employeeRouter.route('/:employeeId/contracts/:contractId')
 
 // SALARIES
 employeeRouter.route('/:employeeId/salaries')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -292,7 +299,7 @@ employeeRouter.route('/:employeeId/salaries')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -318,11 +325,11 @@ employeeRouter.route('/:employeeId/salaries')
     )
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("PUT operation is not supported here.");
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -352,7 +359,8 @@ employeeRouter.route('/:employeeId/salaries')
 });
 
 employeeRouter.route('/:employeeId/salaries/:salaryId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -376,11 +384,11 @@ employeeRouter.route('/:employeeId/salaries/:salaryId')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("POST operation is not supported here.");
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -416,184 +424,7 @@ employeeRouter.route('/:employeeId/salaries/:salaryId')
     )
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
-    Employees.findById(req.params.employeeId)
-    .then(
-        (employee) => {
-            if (employee != null && employee.salaries.id(req.params.salaryId) != null) {
-                employee.salaries.id(req.params.salaryId).remove();
-                employee.save()
-                .then(
-                    (employee) => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(employee);                
-                    },
-                    (err) => next(err)
-                );
-            }
-            else if (employee == null) {
-                err = new Error("Employee " + req.params.employeeId + " is not found.");
-                err.status = 404;
-                return next(err);
-            }
-            else {
-                err = new Error("Salary " + req.params.salaryId + " is not found.");
-                err.status = 404;
-                return next(err);            
-            }
-        },
-        (err) => next(err)
-    )
-    .catch((err) => next(err));
-});
-
-// SALARIES
-employeeRouter.route('/:employeeId/salaries')
-.get((req, res, next) => {
-    Employees.findById(req.params.employeeId)
-    .then(
-        (employee) => {
-            if (employee != null) {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(employee.salaries);
-            }
-            else {
-                err = new Error("Employee " + req.params.employeeId + " is not found.");
-                err.status = 404;
-                return next(err);
-            }
-        },
-        (err) => next(err)
-    )
-    .catch((err) => next(err));
-})
-.post((req, res, next) => {
-    Employees.findById(req.params.employeeId)
-    .then(
-        (employee) => {
-            if (employee != null) {
-                employee.salaries.push(req.body);
-                employee.save()
-                .then(
-                    (employee) => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(employee);                
-                    },
-                    (err) => next(err)
-                );
-            }
-            else {
-                err = new Error("Employee " + req.params.employeeId + " is not found.");
-                err.status = 404;
-                return next(err);
-            }
-        },
-        (err) => next(err)
-    )
-    .catch((err) => next(err));
-})
-.put((req, res, next) => {
-    res.statusCode = 403;
-    res.end("PUT operation is not supported here.");
-})
-.delete((req, res, next) => {
-    Employees.findById(req.params.employeeId)
-    .then(
-        (employee) => {
-            if (employee != null) {
-                for (var i = employee.salaries.length - 1; i >= 0; i--) {
-                    employee.salaries.id(employee.salaries[i]._id).remove();
-                }
-                employee.save()
-                .then(
-                    (employee) => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(employee);                
-                    },
-                    (err) => next(err)
-                );
-            }
-            else {
-                err = new Error("Employee " + req.params.employeeId + " is not found.");
-                err.status = 404;
-                return next(err);
-            }
-        },
-        (err) => next(err)
-    )
-    .catch((err) => next(err));    
-});
-
-employeeRouter.route('/:employeeId/salaries/:salaryId')
-.get((req, res, next) => {
-    Employees.findById(req.params.employeeId)
-    .then(
-        (employee) => {
-            if (employee != null && employee.salaries.id(req.params.salaryId) != null) {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(employee.salaries.id(req.params.salaryId));
-            }
-            else if (employee == null) {
-                err = new Error("Employee " + req.params.employeeId + " is not found.");
-                err.status = 404;
-                return next(err);
-            }
-            else {
-                err = new Error("Salary " + req.params.salaryId + " is not found.");
-                err.status = 404;
-                return next(err);            
-            }
-        },
-        (err) => next(err)
-    )
-    .catch((err) => next(err));
-})
-.post((req, res, next) => {
-    res.statusCode = 403;
-    res.end("POST operation is not supported here.");
-})
-.put((req, res, next) => {
-    Employees.findById(req.params.employeeId)
-    .then(
-        (employee) => {
-            if (employee != null && employee.salaries.id(req.params.salaryId) != null) {
-                if (req.body.value) {
-                    employee.salaries.id(req.params.salaryId).value = req.body.value;
-                }
-                if (req.body.from) {
-                    employee.salaries.id(req.params.salaryId).from = req.body.from;                
-                }
-                employee.save()
-                .then(
-                    (employee) => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(employee);                
-                    },
-                    (err) => next(err)
-                );
-            }
-            else if (employee == null) {
-                err = new Error("Employee " + req.params.employeeId + " is not found.");
-                err.status = 404;
-                return next(err);
-            }
-            else {
-                err = new Error("Salary " + req.params.salaryId + " is not found.");
-                err.status = 404;
-                return next(err);            
-            }
-        },
-        (err) => next(err)
-    )
-    .catch((err) => next(err));
-})
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -627,7 +458,8 @@ employeeRouter.route('/:employeeId/salaries/:salaryId')
 
 // VACATIONS
 employeeRouter.route('/:employeeId/vacations')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -646,7 +478,7 @@ employeeRouter.route('/:employeeId/vacations')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -672,11 +504,11 @@ employeeRouter.route('/:employeeId/vacations')
     )
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("PUT operation is not supported here.");
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -706,7 +538,8 @@ employeeRouter.route('/:employeeId/vacations')
 });
 
 employeeRouter.route('/:employeeId/vacations/:vacationId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -730,11 +563,11 @@ employeeRouter.route('/:employeeId/vacations/:vacationId')
     )
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end("POST operation is not supported here.");
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {
@@ -770,7 +603,7 @@ employeeRouter.route('/:employeeId/vacations/:vacationId')
     )
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Employees.findById(req.params.employeeId)
     .then(
         (employee) => {

@@ -5,8 +5,8 @@ var path = require('path');
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var passport = require('passport');
-// var authenticate = require('./authenticate');
-var LocalStrategy = require('passport-local').Strategy;
+var authenticate = require('./authenticate');
+var config = require('./config');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -15,9 +15,8 @@ const employeeRouter = require('./routes/employeeRouter');
 const mongoose = require('mongoose');
 
 const User = require('./models/users');
-// const Employees = require('./models/employees');
 
-const url = 'mongodb://localhost:27017/human-resources-watch';
+const url = config.mongoUrl;
 const connect = mongoose.connect(url);
 
 connect.then(
@@ -39,39 +38,12 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use(session({
-    name: 'session-id',
-    secret: '12345-67890-09876-54321',
-    saveUninitialized: false,
-    resave: false,
-    store: new FileStore()
-}));
-
 app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-function auth (req, res, next) {
-    console.log(req.session);
-
-    if (!req.user) {
-        var err = new Error('You are not authenticated!');
-        err.status = 403;
-        next(err);
-    }
-    else {
-        next();
-    }
-}
-
-app.use(auth);
 
 app.use('/employees', employeeRouter)
 
